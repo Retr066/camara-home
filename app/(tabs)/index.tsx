@@ -1,70 +1,73 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
-import { HelloWave } from '@/components/HelloWave';
+import React, { useEffect, useMemo, useState } from 'react';
+import { StyleSheet, Button, useWindowDimensions, ViewStyle } from 'react-native';
+import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
+import { ThemedView } from '../../components/ThemedView';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import LiveVideoPlayer from '@/components/LiveVideoPlayer';
 
-export default function HomeScreen() {
+export default function App() {
+  const videoRef = React.useRef<Video>(null);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [status, setStatus] = React.useState<AVPlaybackStatus>();
+  const [isOperationInProgress, setIsOperationInProgress] = useState(false);
+
+  useEffect(() => {
+
+    setVideoUrl('http://192.168.18.96:80/api/streams/stream/low')
+
+  }, [])
+
+
+
+
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+
+  // Memorizar el estilo basado en las dimensiones de la pantalla
+  const videoStyle = useMemo<ViewStyle>(() => ({
+    width: screenWidth, // Por ejemplo, 90% del ancho de la pantalla
+    height: screenHeight * 0.5, // Por ejemplo, 50% de la altura de la pantalla
+    alignSelf: 'center',
+    flexDirection: 'row',
+  }), [screenWidth, screenHeight]);
+
   return (
+
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
+      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerImage={<Ionicons size={310} name="camera-sharp" style={styles.headerImage} />}>
+      <ThemedView style={styles.container}>
+        <ThemedText style={styles.title} type="title">Lista de camaras</ThemedText>
+        <ThemedView style={videoStyle}>
+          <LiveVideoPlayer liveStreamUrl={videoUrl} />
+        </ThemedView>
       </ThemedView>
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
+  container: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '80%',
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
+  headerImage: {
+    color: '#808080',
+    bottom: -90,
+    left: -35,
     position: 'absolute',
   },
+  title: {
+    marginBottom: 20,
+  }
 });
